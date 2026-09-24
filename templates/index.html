@@ -1,1 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
 
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plant Disease Detection</title>
+
+    <style>
+        :root {
+            --bg1: #0b1220;
+            --bg2: #0f2a43;
+            --card: rgba(255, 255, 255, 0.08);
+            --card-strong: rgba(255, 255, 255, 0.12);
+            --text: #eaf2ff;
+            --muted: rgba(234, 242, 255, 0.75);
+            --primary: #22c55e;
+            --primary2: #2563eb;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --ok: #34d399;
+            --shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+            --ring: 0 0 0 4px rgba(34, 197, 94, 0.25);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+            color: var(--text);
+            margin: 0;
+            padding: 24px;
+            min-height: 100vh;
+            background: radial-gradient(1200px circle at 10% 10%, rgba(34, 197, 94, 0.25), transparent 40%),
+                radial-gradient(900px circle at 90% 20%, rgba(37, 99, 235, 0.28), transparent 35%),
+                linear-gradient(135deg, var(--bg1), var(--bg2));
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: auto;
+        }
+
+        .topbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 16px;
+            margin-bottom: 18px;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: clamp(22px, 3vw, 34px);
+            letter-spacing: 0.2px;
+        }
+
+        .subtitle {
+            margin-top: 6px;
+            color: var(--muted);
+            font-size: 14px;
+            line-height: 1.4;
+        }
+
+        .chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 14px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            color: var(--muted);
+            user-select: none;
+            white-space: nowrap;
+        }
+
+        .chip b {
+            color: var(--text);
+        }
+
+        .card {
+            background: var(--card);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.14);
+            padding: 20px;
+            border-radius: 16px;
+            box-shadow: var(--shadow);
+            margin-bottom: 18px;
+        }
+
+        .section-title {
+            margin: 0 0 12px 0;
+            font-size: 16px;
+            color: var(--muted);
+            font-weight: 600;
+            letter-spacing: 0.2px;
+        }
+
+        form {
+            display: grid;
+            gap: 14px;
+        }
+
+        .file-row {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 10px;
+        }
+
+        .file-input {
+            position: relative;
+            overflow: hidden;
+            border-radius: 14px;
+            border: 1px dashed rgba(255, 255, 255, 0.22);
+            background: rgba(255, 255, 255, 0.06);
+            padding: 16px;
+            text-align: center;
+        }
+
+        .file-input input[type="file"] {
+            position: absolute;
+            left: 0;
+            top: 0;
+            opacity: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+        }
+
+        .file-input .hint {
+            display: block;
+            color: var(--muted);
+            font-size: 14px;
+            margin-top: 6px;
+        }
+
+        .btn {
+            border: 0;
+            background: linear-gradient(135deg, var(--primary2), var(--primary));
+            color: white;
+            padding: 12px 18px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: 700;
+            letter-spacing: 0.2px;
+            transition: transform 120ms ease, box-shadow 120ms ease, filter 120ms ease;
+            box-shadow: 0 14px 35px rgba(37, 99, 235, 0.25);
+        }
+
+        .btn:hover {
+            transform: translateY(-1px);
+            filter: brightness(1.05);
+        }
+
+        .btn:active {
+            transform: translateY(0px);
+        }
+
+        .btn:focus {
+            outline: none;
+            box-shadow: 0 14px 35px rgba(37, 99, 235, 0.25), var(--ring);
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 18px;
+        }
+
+        @media (min-width: 860px) {
+            .grid {
+                grid-template-columns: 1fr 1.1fr;
+                align-items: start;
+            }
+        }
+
+        .image-box h2,
+        .result-box h2 {
+            margin: 0 0 10px 0;
+            font-size: 18px;
+        }
+
+        img {
+            width: 100%;
+            border-radius: 14px;
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            background: rgba(255, 255, 255, 0.04);
+        }
+
+        .badges {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin: 12px 0 6px;
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            border-radius: 999px;
+            border: 1px solid rgba(255, 255, 255, 0.14);
+            background: rgba(255, 255, 255, 0.07);
+            color: var(--muted);
+            font-weight: 700;
+        }
+
+        .badge .dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: var(--warning);
+            box-shadow: 0 0 0 4px rgba(245, 158, 11, 0.18);
+        }
+
+        .disease {
+            color: #ff7a7a;
+            font-size: 22px;
+            font-weight: 900;
+            margin: 8px 0 6px;
+        }
+
+        .confidence {
+            color: var(--ok);
+            font-size: 18px;
+            font-weight: 800;
+            margin: 0 0 14px;
+        }
+
+        .cure {
+            margin-top: 6px;
+            font-size: 15px;
+            color: var(--muted);
+            line-height: 1.6;
+        }
+
+        .cure strong {
+            color: var(--text);
+        }
+
+        .error-banner {
+            border-radius: 14px;
+            padding: 12px 14px;
+            border: 1px solid rgba(239, 68, 68, 0.35);
+            background: rgba(239, 68, 68, 0.12);
+            color: #fecaca;
+            font-weight: 700;
+        }
+
+        /* Small animation */
+        .card {
+            animation: popIn 220ms ease both;
+        }
+
+        @keyframes popIn {
+            from {
+                opacity: 0;
+                transform: translateY(6px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+
+        <div class="topbar">
+            <div>
+                <h1>🌿 Plant Disease Detection System</h1>
+                <div class="subtitle">Upload a leaf image and get disease prediction with confidence and recommended treatment.</div>
+            </div>
+            <div class="chip" title="Model runs on your uploaded image">
+                <span aria-hidden="true">🧪</span>
+                <span>AI Prediction • <b>Instant</b></span>
+            </div>
+        </div>
+
+        <div class="card">
+            <form action="/predict" method="POST" enctype="multipart/form-data">
+                <div class="file-row">
+                    <div class="file-input" role="button" tabindex="0" aria-label="Choose image to predict">
+                        <div style="font-weight:900;">Choose an image</div>
+                        <span class="hint">JPG / PNG • Max clarity helps accuracy</span>
+                        <input type="file" name="image" required accept="image/*">
+                    </div>
+                </div>
+
+                <button class="btn" type="submit">Predict Disease</button>
+            </form>
+        </div>
+
+        {% if error %}
+        <div class="card">
+            <div class="error-banner">{{ error }}</div>
+        </div>
+        {% endif %}
+
+        {% if disease %}
+        <div class="card">
+            <div class="grid">
+
+                <div class="image-box">
+                    <h2>Uploaded Image</h2>
+                    <img src="{{ url_for('static', filename=image_path) }}" alt="Uploaded Image">
+                </div>
+
+                <div class="result-box">
+                    <div class="section-title">Prediction Result</div>
+                    <h2 class="disease">Disease: {{ disease }}</h2>
+
+                    <h3 class="confidence">Confidence: {{ confidence }}%</h3>
+
+                    <div class="badges">
+                        <div class="badge">
+                            <span class="dot" style="background: #ff4d4d; box-shadow: 0 0 0 4px rgba(255, 77, 77, 0.18);"></span>
+                            <span>Recommendation Ready</span>
+                        </div>
+                    </div>
+
+                    <div class="cure">
+                        <strong>Recommended Treatment</strong>
+                        <div style="margin-top: 6px;">{{ cure }}</div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+        {% endif %}
+
+    </div>
+
+</body>
+
+</html>
